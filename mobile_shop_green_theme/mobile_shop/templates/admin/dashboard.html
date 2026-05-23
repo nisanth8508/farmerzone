@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard – MobiZone{% endblock %}
+{% block extra_css %}
+<style>
+.admin-layout { display:grid; grid-template-columns:220px 1fr; min-height:100vh; }
+.sidebar { background:var(--surface); border-right:1px solid var(--border); padding:1.5rem; }
+.sidebar-brand { font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:800; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:2rem; display:block; text-decoration:none; }
+.sidebar-section { margin-bottom:1.5rem; }
+.sidebar-section h5 { font-size:.7rem; letter-spacing:.1em; color:var(--muted); text-transform:uppercase; margin-bottom:.8rem; padding-left:.5rem; }
+.sidebar-link { display:flex; align-items:center; gap:.7rem; padding:.6rem .8rem; border-radius:10px; color:var(--muted); text-decoration:none; font-size:.9rem; transition:.2s; margin-bottom:.2rem; }
+.sidebar-link:hover,.sidebar-link.active { background:rgba(108,99,255,.15); color:var(--text); }
+.sidebar-link .icon { font-size:1rem; width:20px; }
+.main-content { padding:2rem; overflow:auto; }
+.stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin-bottom:2rem; }
+.stat-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:1.5rem; position:relative; overflow:hidden; }
+.stat-card::before { content:''; position:absolute; top:0; right:0; width:80px; height:80px; border-radius:0 16px 0 80px; opacity:.3; }
+.stat-card.blue::before { background:var(--accent); }
+.stat-card.pink::before { background:var(--accent2); }
+.stat-card.green::before { background:var(--accent3); }
+.stat-card.orange::before { background:#f5a623; }
+.stat-card.red::before { background:#ff4060; }
+.stat-icon { font-size:1.8rem; margin-bottom:.5rem; }
+.stat-value { font-family:'Syne',sans-serif; font-size:1.8rem; font-weight:800; }
+.stat-label { color:var(--muted); font-size:.82rem; margin-top:.3rem; }
+.section-title { font-family:'Syne',sans-serif; font-size:1.2rem; margin-bottom:1rem; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="admin-layout">
+  <div class="sidebar">
+    <a href="{{ url_for('admin_dashboard') }}" class="sidebar-brand">⚡ MobiAdmin</a>
+    <div class="sidebar-section">
+      <h5>Main</h5>
+      <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link active"><span class="icon">📊</span>Dashboard</a>
+      <a href="{{ url_for('admin_products') }}" class="sidebar-link"><span class="icon">📦</span>Products</a>
+      <a href="{{ url_for('admin_orders') }}" class="sidebar-link"><span class="icon">🛒</span>Orders</a>
+      <a href="{{ url_for('admin_customers') }}" class="sidebar-link"><span class="icon">👥</span>Customers</a>
+    </div>
+    <div class="sidebar-section">
+      <h5>Account</h5>
+      <a href="{{ url_for('customer_home') }}" class="sidebar-link"><span class="icon">🏪</span>View Store</a>
+      <a href="{{ url_for('logout') }}" class="sidebar-link"><span class="icon">🚪</span>Logout</a>
+    </div>
+  </div>
+  <div class="main-content">
+    <div class="page-header">
+      <h1>Dashboard</h1>
+      <p>Welcome back, {{ session.user_name }} 👋</p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-icon">📦</div>
+        <div class="stat-value">{{ stats.total_products }}</div>
+        <div class="stat-label">Total Products</div>
+      </div>
+      <div class="stat-card pink">
+        <div class="stat-icon">🛒</div>
+        <div class="stat-value">{{ stats.total_orders }}</div>
+        <div class="stat-label">Total Orders</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon">💰</div>
+        <div class="stat-value">₹{{ "%.0f"|format(stats.total_revenue) }}</div>
+        <div class="stat-label">Total Revenue</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value">{{ stats.total_customers }}</div>
+        <div class="stat-label">Customers</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-value">{{ stats.pending_orders }}</div>
+        <div class="stat-label">Pending Orders</div>
+      </div>
+    </div>
+    <div class="section-title">Recent Orders</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Order ID</th><th>Customer</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>
+          {% for order in recent_orders %}
+          <tr>
+            <td>#{{ order.id }}</td>
+            <td>{{ order.customer_name }}</td>
+            <td style="color:var(--accent3);font-weight:600;">₹{{ "%.0f"|format(order.total) }}</td>
+            <td>{{ order.payment_method|upper }}</td>
+            <td><span class="badge badge-{{ order.status|lower }}">{{ order.status }}</span></td>
+            <td style="color:var(--muted);">{{ order.created_at[:16] }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" style="text-align:center;color:var(--muted);">No orders yet</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:1rem;"><a href="{{ url_for('admin_orders') }}" class="btn btn-outline btn-sm">View All Orders →</a></div>
+  </div>
+</div>
+{% endblock %}

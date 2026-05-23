@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Orders – Admin{% endblock %}
+{% block extra_css %}
+<style>
+.admin-layout { display:grid; grid-template-columns:220px 1fr; min-height:100vh; }
+.sidebar { background:var(--surface); border-right:1px solid var(--border); padding:1.5rem; }
+.sidebar-brand { font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:800; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:2rem; display:block; text-decoration:none; }
+.sidebar-link { display:flex; align-items:center; gap:.7rem; padding:.6rem .8rem; border-radius:10px; color:var(--muted); text-decoration:none; font-size:.9rem; transition:.2s; margin-bottom:.2rem; }
+.sidebar-link:hover,.sidebar-link.active { background:rgba(108,99,255,.15); color:var(--text); }
+.main-content { padding:2rem; }
+.order-card { background:var(--card); border:1px solid var(--border); border-radius:16px; margin-bottom:1rem; overflow:hidden; }
+.order-head { padding:1rem 1.5rem; display:flex; justify-content:space-between; align-items:center; background:var(--surface); border-bottom:1px solid var(--border); }
+.order-body { padding:1rem 1.5rem; }
+.order-items-grid { display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:.8rem; }
+.order-item-chip { background:rgba(108,99,255,.1); border:1px solid rgba(108,99,255,.2); border-radius:8px; padding:.3rem .7rem; font-size:.8rem; }
+.status-form { display:flex; gap:.5rem; align-items:center; }
+.status-form select { background:var(--surface); border:1px solid var(--border); color:var(--text); padding:.3rem .7rem; border-radius:8px; font-family:'DM Sans',sans-serif; font-size:.85rem; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="admin-layout">
+  <div class="sidebar">
+    <a href="{{ url_for('admin_dashboard') }}" class="sidebar-brand">⚡ MobiAdmin</a>
+    <a href="{{ url_for('admin_dashboard') }}" class="sidebar-link"><span>📊</span>Dashboard</a>
+    <a href="{{ url_for('admin_products') }}" class="sidebar-link"><span>📦</span>Products</a>
+    <a href="{{ url_for('admin_orders') }}" class="sidebar-link active"><span>🛒</span>Orders</a>
+    <a href="{{ url_for('admin_customers') }}" class="sidebar-link"><span>👥</span>Customers</a>
+    <a href="{{ url_for('customer_home') }}" class="sidebar-link" style="margin-top:1rem;"><span>🏪</span>View Store</a>
+    <a href="{{ url_for('logout') }}" class="sidebar-link"><span>🚪</span>Logout</a>
+  </div>
+  <div class="main-content">
+    <div class="page-header"><h1>Orders</h1><p>All customer orders</p></div>
+    {% for od in order_details %}
+    <div class="order-card">
+      <div class="order-head">
+        <div>
+          <span style="font-family:'Syne',sans-serif;font-weight:700;">Order #{{ od.order.id }}</span>
+          &nbsp;&nbsp;
+          <span style="color:var(--muted);font-size:.85rem;">{{ od.order.created_at[:16] }}</span>
+        </div>
+        <div style="display:flex;gap:1rem;align-items:center;">
+          <span style="color:var(--accent3);font-weight:700;">₹{{ "%.0f"|format(od.order.total) }}</span>
+          <span class="badge badge-{{ od.order.status|lower }}">{{ od.order.status }}</span>
+        </div>
+      </div>
+      <div class="order-body">
+        <div style="margin-bottom:.8rem;font-size:.9rem;">
+          <strong>{{ od.order.customer_name }}</strong>
+          <span style="color:var(--muted);margin-left:.5rem;">{{ od.order.email }}</span>
+          &nbsp;|&nbsp; Payment: <span style="color:var(--accent);">{{ od.order.payment_method|upper }}</span>
+        </div>
+        {% if od.order.address %}
+        <div style="font-size:.82rem;color:var(--muted);margin-bottom:.8rem;">📍 {{ od.order.address }}</div>
+        {% endif %}
+        <div class="order-items-grid">
+          {% for item in od.items %}
+          <div class="order-item-chip">{{ item.name }} × {{ item.quantity }} — ₹{{ "%.0f"|format(item.price * item.quantity) }}</div>
+          {% endfor %}
+        </div>
+        <form method="POST" action="{{ url_for('update_order_status', oid=od.order.id) }}" class="status-form">
+          <span style="font-size:.85rem;color:var(--muted);">Update Status:</span>
+          <select name="status">
+            {% for s in ['Pending','Processing','Shipped','Delivered','Cancelled'] %}
+            <option value="{{ s }}" {% if od.order.status==s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="btn btn-primary btn-sm">Update</button>
+        </form>
+      </div>
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:3rem;color:var(--muted);">No orders yet.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

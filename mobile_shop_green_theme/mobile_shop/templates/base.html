@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}MobiZone{% endblock %}</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #e8f5e9;
+  --surface: #1b5e20;
+  --card: #ffffff;
+  --border: #a5d6a7;
+  --accent: #2e7d32;
+  --accent2: #66bb6a;
+  --accent3: #43a047;
+  --text: #1b4332;
+  --muted: #4f6f52;
+  --white: #ffffff;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; }
+h1,h2,h3,h4 { font-family:'Syne',sans-serif; }
+
+/* NAV */
+nav { background:var(--surface); border-bottom:1px solid var(--border); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:64px; position:sticky; top:0; z-index:100; }
+.nav-brand { font-family:'Syne',sans-serif; font-size:1.4rem; font-weight:800; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-decoration:none; }
+.nav-links { display:flex; gap:1rem; align-items:center; }
+.nav-links a { color:var(--muted); text-decoration:none; font-size:.9rem; padding:.4rem .8rem; border-radius:8px; transition:.2s; }
+.nav-links a:hover { color:var(--text); background:var(--card); }
+.btn { display:inline-flex; align-items:center; gap:.5rem; padding:.5rem 1.2rem; border-radius:10px; border:none; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:.9rem; font-weight:500; text-decoration:none; transition:.2s; }
+.btn-primary { background:var(--accent); color:#fff; }
+.btn-primary:hover { background:#7c74ff; transform:translateY(-1px); }
+.btn-danger { background:#ff4060; color:#fff; }
+.btn-danger:hover { background:#ff2040; }
+.btn-success { background:var(--accent3); color:#000; }
+.btn-outline { background:transparent; color:var(--text); border:1px solid var(--border); }
+.btn-outline:hover { border-color:var(--accent); color:var(--accent); }
+.btn-sm { padding:.3rem .8rem; font-size:.8rem; }
+
+/* ALERTS */
+.alerts { padding:1rem 2rem 0; }
+.alert { padding:.8rem 1.2rem; border-radius:10px; margin-bottom:.5rem; font-size:.9rem; }
+.alert-success { background:rgba(67,233,123,.15); border:1px solid rgba(67,233,123,.3); color:var(--accent3); }
+.alert-danger { background:rgba(255,64,96,.15); border:1px solid rgba(255,64,96,.3); color:#ff6080; }
+.alert-warning { background:rgba(255,200,60,.15); border:1px solid rgba(255,200,60,.3); color:#ffc83c; }
+.alert-info { background:rgba(108,99,255,.15); border:1px solid rgba(108,99,255,.3); color:var(--accent); }
+
+/* BADGE */
+.badge { display:inline-block; padding:.2rem .6rem; border-radius:20px; font-size:.75rem; font-weight:600; }
+.badge-pending { background:rgba(255,200,60,.15); color:#ffc83c; }
+.badge-processing { background:rgba(108,99,255,.15); color:var(--accent); }
+.badge-shipped { background:rgba(67,233,123,.15); color:var(--accent3); }
+.badge-delivered { background:rgba(67,233,123,.3); color:#2ecc71; }
+.badge-cancelled { background:rgba(255,64,96,.15); color:#ff6080; }
+
+/* CONTAINER */
+.container { max-width:1200px; margin:0 auto; padding:2rem; }
+.page-header { margin-bottom:2rem; }
+.page-header h1 { font-size:2rem; margin-bottom:.4rem; }
+.page-header p { color:var(--muted); }
+
+/* TABLE */
+.table-wrap { background:var(--card); border-radius:16px; border:1px solid var(--border); overflow:hidden; }
+table { width:100%; border-collapse:collapse; }
+th { background:var(--surface); padding:1rem 1.2rem; text-align:left; font-family:'Syne',sans-serif; font-size:.8rem; letter-spacing:.05em; color:var(--muted); border-bottom:1px solid var(--border); }
+td { padding:.9rem 1.2rem; border-bottom:1px solid var(--border); font-size:.9rem; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:rgba(76,175,80,.08); }
+
+/* FORM */
+.form-card { background:var(--card); border-radius:16px; border:1px solid var(--border); padding:2rem; max-width:600px; }
+.form-group { margin-bottom:1.2rem; }
+.form-group label { display:block; margin-bottom:.4rem; font-size:.85rem; color:var(--muted); }
+.form-group input, .form-group select, .form-group textarea {
+  width:100%; background:var(--surface); border:1px solid var(--border); color:var(--text);
+  padding:.7rem 1rem; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:.9rem; transition:.2s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(76,175,80,.15);
+}
+.form-group textarea { resize:vertical; min-height:80px; }
+select option { background:var(--surface); }
+</style>
+{% block extra_css %}{% endblock %}
+</head>
+<body>
+{% block nav %}{% endblock %}
+<div class="alerts">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="alert alert-{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+</div>
+{% block content %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}My Orders – MobiZone{% endblock %}
+{% block extra_css %}
+<style>
+.top-nav { background:var(--surface); border-bottom:1px solid var(--border); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:64px; }
+.order-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:1.5rem; margin-bottom:1.2rem; }
+.order-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid var(--border); }
+.order-id { font-family:'Syne',sans-serif; font-weight:700; }
+.order-meta { color:var(--muted); font-size:.82rem; margin-top:.2rem; }
+.order-items-list { display:flex; flex-direction:column; gap:.4rem; margin-bottom:1rem; }
+.order-item-row { display:flex; justify-content:space-between; font-size:.88rem; padding:.3rem 0; }
+.order-footer { display:flex; justify-content:space-between; align-items:center; padding-top:1rem; border-top:1px solid var(--border); }
+.empty { text-align:center; padding:4rem; color:var(--muted); }
+</style>
+{% endblock %}
+{% block content %}
+<nav class="top-nav">
+  <a href="{{ url_for('customer_home') }}" class="nav-brand">📱 MobiZone</a>
+  <div class="nav-links">
+    <a href="{{ url_for('cart') }}">Cart</a>
+    <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">Logout</a>
+  </div>
+</nav>
+<div class="container">
+  <div class="page-header"><h1>📦 My Orders</h1><p>Track all your orders</p></div>
+  {% if order_details %}
+    {% for od in order_details %}
+    <div class="order-card">
+      <div class="order-header">
+        <div>
+          <div class="order-id">Order #{{ od.order.id }}</div>
+          <div class="order-meta">{{ od.order.created_at[:16] }} &nbsp;|&nbsp; {{ od.order.payment_method|upper }}</div>
+          {% if od.order.address %}<div class="order-meta" style="margin-top:.2rem;">📍 {{ od.order.address[:60] }}...</div>{% endif %}
+        </div>
+        <span class="badge badge-{{ od.order.status|lower }}">{{ od.order.status }}</span>
+      </div>
+      <div class="order-items-list">
+        {% for item in od.items %}
+        <div class="order-item-row">
+          <span>{{ item.name }} × {{ item.quantity }}</span>
+          <span style="color:var(--muted);">₹{{ "%.0f"|format(item.price * item.quantity) }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="order-footer">
+        <span style="color:var(--muted);font-size:.85rem;">Payment: {{ od.order.payment_method }}</span>
+        <span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--accent3);">₹{{ "%.0f"|format(od.order.total) }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+  <div class="empty">
+    <div style="font-size:4rem;margin-bottom:1rem;">📭</div>
+    <h2>No orders yet</h2>
+    <p style="margin:1rem 0;">Start shopping to place your first order!</p>
+    <a href="{{ url_for('customer_home') }}" class="btn btn-primary">Shop Now</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

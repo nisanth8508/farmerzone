@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}Shop – MobiZone{% endblock %}
+{% block extra_css %}
+<style>
+.shop-nav { background:var(--surface); border-bottom:1px solid var(--border); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:64px; position:sticky; top:0; z-index:100; }
+.search-bar { display:flex; gap:.5rem; flex:1; max-width:400px; margin:0 2rem; }
+.search-bar input { flex:1; background:var(--card); border:1px solid var(--border); color:var(--text); padding:.5rem 1rem; border-radius:10px; font-family:'DM Sans',sans-serif; }
+.search-bar input:focus { outline:none; border-color:var(--accent); }
+.hero { padding:3rem 2rem; text-align:center; background: radial-gradient(ellipse at center, rgba(108,99,255,.15) 0%, transparent 70%); }
+.hero h1 { font-size:2.5rem; margin-bottom:.8rem; }
+.hero p { color:var(--muted); font-size:1.1rem; }
+.categories { padding:1rem 2rem; display:flex; gap:.6rem; flex-wrap:wrap; justify-content:center; }
+.cat-btn { padding:.4rem 1rem; border-radius:20px; border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; text-decoration:none; font-size:.85rem; transition:.2s; }
+.cat-btn:hover,.cat-btn.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+.products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:1.5rem; padding:1.5rem 2rem 3rem; }
+.product-card { background:var(--card); border:1px solid var(--border); border-radius:16px; overflow:hidden; transition:.2s; text-decoration:none; display:block; }
+.product-card:hover { transform:translateY(-4px); border-color:var(--accent); box-shadow:0 8px 32px rgba(108,99,255,.2); }
+.product-img { height:180px; display:flex; align-items:center; justify-content:center; background:var(--surface); font-size:4rem; }
+.product-info { padding:1rem; }
+.product-cat { font-size:.75rem; color:var(--accent); font-weight:600; margin-bottom:.3rem; text-transform:uppercase; letter-spacing:.05em; }
+.product-name { font-family:'Syne',sans-serif; font-size:1rem; font-weight:700; margin-bottom:.4rem; color:var(--text); }
+.product-desc { font-size:.82rem; color:var(--muted); margin-bottom:.8rem; line-height:1.5; }
+.product-footer { display:flex; align-items:center; justify-content:space-between; }
+.product-price { font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:800; color:var(--accent3); }
+.cart-icon { position:relative; }
+.cart-badge { position:absolute; top:-8px; right:-8px; background:var(--accent2); color:#fff; border-radius:50%; width:18px; height:18px; display:flex; align-items:center; justify-content:center; font-size:.65rem; font-weight:700; }
+.add-btn { background:var(--accent); color:#fff; border:none; border-radius:8px; padding:.4rem .9rem; font-size:.8rem; cursor:pointer; font-family:'DM Sans',sans-serif; transition:.2s; }
+.add-btn:hover { background:#7c74ff; }
+</style>
+{% endblock %}
+{% block content %}
+<nav class="shop-nav">
+  <a href="{{ url_for('customer_home') }}" class="nav-brand">📱 MobiZone</a>
+  <form class="search-bar" method="GET">
+    <input type="text" name="search" placeholder="Search products..." value="{{ search }}">
+    <button class="btn btn-primary btn-sm" type="submit">Search</button>
+  </form>
+  <div class="nav-links">
+    {% if session.user_id %}
+      <a href="{{ url_for('cart') }}" class="cart-icon" style="position:relative;color:var(--muted);text-decoration:none;padding:.4rem .8rem;">
+        🛒 Cart {% if cart_count %}<span class="cart-badge">{{ cart_count }}</span>{% endif %}
+      </a>
+      <a href="{{ url_for('my_orders') }}">My Orders</a>
+      <span style="color:var(--muted);font-size:.85rem;">Hi, {{ session.user_name }}</span>
+      <a href="{{ url_for('logout') }}" class="btn btn-outline btn-sm">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}" class="btn btn-outline btn-sm">Login</a>
+      <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Register</a>
+    {% endif %}
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>📱 Mobile Accessories</h1>
+  <p>Premium quality accessories for every device</p>
+</div>
+
+<div class="categories">
+  <a href="{{ url_for('customer_home') }}" class="cat-btn {% if not selected_category %}active{% endif %}">All</a>
+  {% for cat in categories %}
+    <a href="{{ url_for('customer_home', category=cat.category) }}" class="cat-btn {% if selected_category==cat.category %}active{% endif %}">{{ cat.category }}</a>
+  {% endfor %}
+</div>
+
+<div class="products-grid">
+  {% set icons = {'Cases':'🛡️','Screen Guards':'🔒','Chargers':'⚡','Audio':'🎧','Mounts':'🔧','Accessories':'🔌','Grips':'✋','Power':'🔋'} %}
+  {% for p in products %}
+  <div class="product-card">
+    <div class="product-img">{{ icons.get(p.category, '📦') }}</div>
+    <div class="product-info">
+      <div class="product-cat">{{ p.category }}</div>
+      <div class="product-name">{{ p.name }}</div>
+      <div class="product-desc">{{ p.description }}</div>
+      <div class="product-footer">
+        <div class="product-price">₹{{ "%.0f"|format(p.price) }}</div>
+        {% if session.user_id %}
+        <form method="POST" action="{{ url_for('add_to_cart', pid=p.id) }}">
+          <input type="hidden" name="quantity" value="1">
+          <button class="add-btn" type="submit">+ Cart</button>
+        </form>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="add-btn" style="text-decoration:none;display:inline-block;">Buy</a>
+        {% endif %}
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);margin-top:.4rem;">Stock: {{ p.stock }} left</div>
+    </div>
+  </div>
+  {% else %}
+  <p style="color:var(--muted);grid-column:1/-1;text-align:center;padding:3rem;">No products found.</p>
+  {% endfor %}
+</div>
+{% endblock %}
